@@ -1,5 +1,3 @@
-# abi-proj
+CoPTR is a tool for estimating peak-to-trough ratios from metagenomic sequencing.
 
-Just some random code that might be useful for integration of my COPTR homebrew and CellRank
-
-Python 3.9
+You can find our documentation on Read The Docs: <https://coptr.readthedocs.io>
