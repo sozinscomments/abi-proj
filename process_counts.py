@@ -63,6 +63,7 @@ for tup, count in total_dict.items():
     abund_df.loc[tup[1],tup[0]] = count
 
 #FUTURE CHANGE! Will need to normalize these abundances based on length of the fasta files if we want them to really indicate abudance
+#AFTER NORMALIZATION, take the log of the abundances!
 
 #convert this df to a adata object and make it the PTR object a layer of it
 adata_abund = anndata.AnnData(abund_df)
