@@ -65,12 +65,36 @@ abund_df.sort_index(inplace=True)
 for tup, count in total_dict.items():
     abund_df.loc[tup[1],tup[0]] = count
 
+#Section 3: Normalize abundance from genome length
+#this assumes that there's a stats.tsv file in this directory obtained by running the get_lengths_from_fasta.sh
+
+genome_lengths = pd.read_csv("stats.tsv", sep="\t")
+
+#only one relavent columns, the file name (which is species) and total length
+genome_lengths = genome_lengths[["file", "sum_len"]]
+
+#sort by species so this is the same order
+name_to_index = {name:index for index, name in enumerate(list(var))}
+genome_lengths['index'] = genome_lengths['file'].map(name_to_index) #makes new column to sort by
+genome_lengths.sort_values(by = 'index', inplace = True)
+genome_lengths.drop(columns=['index', 'file'], inplace = True)
+
+#now we have a dataframe thats just one column (sum_len)
+len_series = genome_lengths['sum_len'].values
+
+#make it so that we're dividing instead of multiplying
+len_series = len_series / 1000000
+len_series = np.reciprocal(len_series)
+
+#apply this vector to the abundance dataframe to normalize based on length
+abund_df = abund_df * len_series
+
 #add 1, to handle log(0) issue
-abund_df += 1
 #Take the log of the abundances
+abund_df += 1
 abund_df = np.log(abund_df)
 
-#Section 3: Combine into AnnData
+#Section 4: Combine into AnnData
 #convert this df to a adata object and make it the PTR object a layer of it
 adata_abund = anndata.AnnData(abund_df)
 #Need to refer to the abundance as a layer, so make it an alias for the base layer X. There may be a better way to do this, not experienced with adata
@@ -81,7 +105,7 @@ adata_abund.layers["PTR"] = adata_PTR_trans.X
 print(adata_abund.to_df(layer="abundance"))
 print(adata_abund.to_df(layer="PTR"))
 
-#Section 4: cellrank stuff
+#Section 5: cellrank stuff
 #TEST CELLRANK USAGE
 
 #ADD CLUSTER LABELS
